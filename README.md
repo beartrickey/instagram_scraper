@@ -21,7 +21,7 @@ RUNNING THE APP
 - Run "python manage.py runserver" (defaults to port 8000)
 - Visit http://127.0.0.1:8000 in your browser (I've only confirmed on Chrome for the time being)
 - Sign in to Instagram
-
+- Upon sign in you should be redirected to the apps main dashboard
 - Enter job information:
  - Tag (without hashmark)
  - From date (exclusive)
