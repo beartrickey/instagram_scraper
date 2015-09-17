@@ -175,11 +175,20 @@ def scan_tagged_content(job, access_token):
 			params=payload
 		)
 
+		# Break if we don't have a 200 success status
+		if r.status_code != 200:
+			continue_job = False
+			break
+
 		# Ensure we're still over our rate limit
 		headers = r.headers
-		rate_limit_remaining = int(headers.get("X-Ratelimit-Remaining"))
-		if rate_limit_remaining <= 0:
+		try:
+			rate_limit_remaining = int(headers.get("X-Ratelimit-Remaining"))
+			if rate_limit_remaining <= 0:
+				continue_job = False
+		except TypeError:
 			continue_job = False
+			break
 
 		# Iterate through each content object in page data
 		page = json.loads(r.text)
