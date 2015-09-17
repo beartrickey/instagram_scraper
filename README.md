@@ -9,9 +9,9 @@ DATABASE:
 - create database "pixlee"
 
 PROJECT SETUP
-- Make a virtual env with python 2.7.10 (run "virtualenv instagram_env")
+- Make a virtual env with python 2.7.10 (run "virtualenv instagram_scraper_env")
 - cd into instagram_env
-- Activate the virtualenv (inside instagram_env, run "source bin/activate")
+- Activate the virtualenv (inside instagram_scraper_env, run "source bin/activate")
 - Clone the repository
 - cd into repository
 - Run "pip install -r requirements.txt"
