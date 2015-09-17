@@ -9,9 +9,9 @@ DATABASE:
 - create database "pixlee"
 
 PROJECT SETUP
-- Make a virtual env with python 2.7.10 (run "virtualenv instagram_env")
+- Make a virtual env with python 2.7.10 (run "virtualenv instagram_scraper_env")
 - cd into instagram_env
-- Activate the virtualenv (inside instagram_env, run "source bin/activate")
+- Activate the virtualenv (inside instagram_scraper_env, run "source bin/activate")
 - Clone the repository
 - cd into repository
 - Run "pip install -r requirements.txt"
@@ -21,7 +21,7 @@ RUNNING THE APP
 - Run "python manage.py runserver" (defaults to port 8000)
 - Visit http://127.0.0.1:8000 in your browser (I've only confirmed on Chrome for the time being)
 - Sign in to Instagram
-
+- Upon sign in you should be redirected to the apps main dashboard
 - Enter job information:
  - Tag (without hashmark)
  - From date (exclusive)
