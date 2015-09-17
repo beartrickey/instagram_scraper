@@ -1,0 +1,185 @@
+{% load crispy_forms_tags %}
+{% load static %}
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Instagram Scraper</title>
+
+		<script type="text/javascript" src="{% static "pixlee_app/bower_components/jquery/dist/jquery.min.js" %}"></script>
+		<script type="text/javascript" src="{% static "pixlee_app/bower_components/moment/min/moment.min.js" %}"></script>
+		<script type="text/javascript" src="{% static "pixlee_app/bower_components/bootstrap/dist/js/bootstrap.min.js" %}"></script>
+		<script type="text/javascript" src="{% static "pixlee_app/bower_components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js" %}"></script>
+		<link rel="stylesheet" href="{% static "pixlee_app/bower_components/bootstrap/dist/css/bootstrap.min.css" %}" />
+		<link rel="stylesheet" href="{% static "pixlee_app/bower_components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css" %}" />
+
+		<script type="text/javascript">
+
+			
+			// Initialize page
+			var accessToken = null;
+
+			$(document).ready(function(){
+
+				// Datetime pickers
+				$("#id_from_date").datetimepicker({
+					format: 'YYYY-MM-DD',
+					maxDate: moment()
+				});
+				$("#id_to_date").datetimepicker({
+					format: 'YYYY-MM-DD',
+					maxDate: moment().add(1, "days")
+				});
+
+				// Get access token from url fragment
+				var frag = window.location.hash.substr(1);
+				accessToken = frag.split("=")[1];				
+				console.log(accessToken);
+
+				// Start polling for status
+				pollStatus();
+			});
+
+
+			// Polls the job and instagram api status every N seconds
+			function pollStatus(){
+
+				$.ajax(
+				{
+					type: "GET",
+					dataType: "json",
+					url: "{% url "get_status_view" %}",
+					data: {
+						access_token: accessToken,
+					},
+					beforeSend:function(){
+					},
+					success:function(response){
+						
+						var jobs = response.jobs;
+						var tbody = $("#job-table tbody");
+						tbody.empty();
+
+						for(job in jobs){
+
+							var tag = jobs[job]["tag__name"];
+							var from_date = jobs[job]["from_date"];
+							var to_date = jobs[job]["to_date"];
+							var started_datetime = jobs[job]["job_start_datetime"];
+							var checked_pages = jobs[job]["checked_pages"];
+							var image_count = jobs[job]["image_count"];
+							var job_pk = jobs[job]["pk"];
+
+							// Special case for rebooting
+							var ok_to_reboot = jobs[job]["ok_to_reboot"];
+							var button_text = "";
+							if(ok_to_reboot === 1){
+								button_text = "<button type='button' id='button-" + job_pk + "' onclick='rebootJob(" + job_pk +")'>Reboot Job</button>";
+							}
+							
+							tbody.append(
+								"<tr><td>" + tag + "</td><td>" + from_date + 
+								"</td><td>" + to_date + "</td><td>" + started_datetime + 
+								"</td><td>" + checked_pages + "</td><td>" + image_count +
+								"</td><td>" + button_text +
+								"</td></tr>"
+							);
+						}
+					},
+					error:function(xhr, ajaxOptions, thrownError){
+					}
+				});
+
+				setTimeout("pollStatus()", 3000);
+			};
+
+
+			// Submits the job data entered by the user in the form
+			function submitJob(){
+
+				$.ajax(
+				{
+					type: "POST",
+					dataType: "json",
+					url: "{% url "submit_job_view" %}",
+					data: {
+						tag: $("#id_tag").val(),
+						to_date: $("#id_to_date").val(),
+						from_date: $("#id_from_date").val(),
+						access_token: accessToken,
+					},
+					beforeSend:function(){
+						// Empty the form
+						$("form")[0].reset()
+					},
+					success:function(response){
+						
+					},
+					error:function(xhr, ajaxOptions, thrownError){
+						// Show field errors if applicable
+					}
+				});
+			};
+
+			// Reboot previously halted job
+			function rebootJob(pk){
+
+				$.ajax(
+				{
+					type: "POST",
+					dataType: "json",
+					url: "{% url "reboot_job_view" %}",
+					data: {
+						pk: pk,
+						access_token: accessToken,
+					},
+					beforeSend:function(){
+						var buttonId = "#button-" + pk;
+						$(buttonId).remove();
+					},
+					success:function(response){
+					},
+					error:function(xhr, ajaxOptions, thrownError){
+						// Show field errors if applicable
+					}
+				});
+			};
+
+
+		</script>
+	</head>
+
+	<body>
+
+		<div class="container">
+			<h1>Instagram Scraper</h1>
+
+			<div class="row">
+				<div class="col-sm-4">
+					<div class="well">
+						{% crispy submit_job_form %} 
+					</div>
+				</div>
+				<div class="col-sm-8">
+					<div class="well">
+						<legend>Current Jobs</legend>
+						<table class="table" id="job-table">
+							<thead>
+								<th>Tag</th>
+								<th>From</th>
+								<th>To</th>
+								<th>Started Time</th>
+								<th>Pages Checked</th>
+								<th>Image Count</th>
+								<th>Action</th>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</body>
+
+</html>
